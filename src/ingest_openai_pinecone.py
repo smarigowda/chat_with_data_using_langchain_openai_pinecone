@@ -64,18 +64,7 @@ def main():
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
     # create embeddings and store them in pinecone index
-    # docsearch = Pinecone.from_documents(docs, embeddings, index_name=index_name)
-
-    # load an existing index
-    docsearch = Pinecone.from_existing_index(index_name, embeddings)
-
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    qa = ConversationalRetrievalChain.from_llm(
-        OpenAI(temperature=0), docsearch.as_retriever(), memory=memory
-    )
-    query = "What was the case about ?"
-    result = qa({"question": query})
-    print(result)
+    Pinecone.from_documents(docs, embeddings, index_name=index_name)
     pass
 
 

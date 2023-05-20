@@ -1,0 +1,9 @@
+bin/
+lib/
+include/
+.DS_Store
+.env
+LLM_model
+db/
+share/
+__pycache__

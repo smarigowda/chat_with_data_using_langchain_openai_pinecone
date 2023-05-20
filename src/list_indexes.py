@@ -8,7 +8,8 @@ pinecone_index_name = os.environ.get("PINECONE_INDEX_NAME")
 
 def main():
     pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
-    pinecone.create_index(pinecone_index_name, metric="cosine", dimension=1056)
+    list_of_indexes = pinecone.list_indexes()
+    print(list_of_indexes)
     pass
 
 

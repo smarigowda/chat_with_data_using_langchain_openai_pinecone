@@ -20,7 +20,7 @@ def main():
     pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
     # loader = DirectoryLoader("./docs", glob="**/*.pdf")
     # loader = PyPDFLoader("./docs/pdfs/us_reports_morse_v_frederick.pdf")
-    loader = UnstructuredPDFLoader("./docs/pdfs/test.pdf")
+    loader = UnstructuredPDFLoader("./docs/pdfs/morse_vs_frederick.pdf")
 
     docs = loader.load()
     # pages = loader.load_and_split()

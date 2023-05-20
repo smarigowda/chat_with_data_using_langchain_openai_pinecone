@@ -7,6 +7,9 @@ from langchain.document_loaders import PDFMinerLoader, CSVLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+from langchain.llms import OpenAI
 
 loader_mappings = {
     ".pdf": (PDFMinerLoader, {}),
@@ -57,17 +60,21 @@ def main():
     print(f"Split into {len(docs)} chunks of text. Max chunk size is {chunk_size}")
 
     # initialize pinecone
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
     # create embeddings and store them in pinecone index
-    docsearch = Pinecone.from_documents(docs, embeddings, index_name=index_name)
+    # docsearch = Pinecone.from_documents(docs, embeddings, index_name=index_name)
 
     # load an existing index
-    # docsearch = Pinecone.from_existing_index(index_name, embeddings)
+    docsearch = Pinecone.from_existing_index(index_name, embeddings)
 
-    query = "How did Congress win in elections for Karnataka state on India ?"
-    result = docsearch.similarity_search(query)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    qa = ConversationalRetrievalChain.from_llm(
+        OpenAI(temperature=0), docsearch.as_retriever(), memory=memory
+    )
+    query = "What was the case about ?"
+    result = qa({"question": query})
     print(result)
     pass
 

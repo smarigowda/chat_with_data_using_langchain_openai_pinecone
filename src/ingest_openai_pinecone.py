@@ -1,9 +1,12 @@
 import os
 import glob
+import pinecone
 from dotenv import load_dotenv
 from langchain.docstore.document import Document
 from langchain.document_loaders import PDFMinerLoader, CSVLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Pinecone
 
 loader_mappings = {
     ".pdf": (PDFMinerLoader, {}),
@@ -15,6 +18,10 @@ load_dotenv()
 
 chunk_size = os.environ.get("CHUNK_SIZE")
 chunk_overlap = os.environ.get("CHUNK_OVERLAP")
+pinecone_api_key = os.environ.get("PINECONE_API_KEY")
+pinecone_environment = os.environ.get("PINECONE_ENVIRONMENT")
+index_name = os.environ.get("PINECONE_INDEX_NAME")
+openai_api_key = os.environ.get("OPENAI_API_KEY")
 
 
 # load a single document from file_path
@@ -41,15 +48,27 @@ def load_all_documents(source_dir: str) -> list[Document]:
 def main():
     # load documents and split into chunks
     source_dir = os.getenv("SOURCE_DIR")
-    # chunk_size = 500
-    # chunk_overlap = 50
     documents = load_all_documents(source_dir)
     print(f"Loaded {len(documents)} documents form {source_dir} directory")
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=int(chunk_size), chunk_overlap=int(chunk_overlap)
     )
-    texts = text_splitter.split_documents(documents)
-    print(f"Split into {len(texts)} chunks of text. Max chunk size is {chunk_size}")
+    docs = text_splitter.split_documents(documents)
+    print(f"Split into {len(docs)} chunks of text. Max chunk size is {chunk_size}")
+
+    # initialize pinecone
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
+
+    # create embeddings and store them in pinecone index
+    docsearch = Pinecone.from_documents(docs, embeddings, index_name=index_name)
+
+    # load an existing index
+    # docsearch = Pinecone.from_existing_index(index_name, embeddings)
+
+    query = "How did Congress win in elections for Karnataka state on India ?"
+    result = docsearch.similarity_search(query)
+    print(result)
     pass
 
 

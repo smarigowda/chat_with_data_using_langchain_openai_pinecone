@@ -30,7 +30,7 @@ def main():
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     qa = ConversationalRetrievalChain.from_llm(
-        OpenAI(temperature=0), docsearch.as_retriever(), memory=memory
+        OpenAI(temperature=0.9), docsearch.as_retriever(), memory=memory
     )
     query = "What is this legal case about ?"
     result = qa({"question": query})

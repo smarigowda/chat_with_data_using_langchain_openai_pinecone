@@ -26,7 +26,9 @@ def main():
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
     # load an existing index
-    docsearch = Pinecone.from_existing_index(index_name, embeddings)
+    docsearch = Pinecone.from_existing_index(
+        index_name=index_name, embedding=embeddings, namespace="text"
+    )
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     qa = ConversationalRetrievalChain.from_llm(

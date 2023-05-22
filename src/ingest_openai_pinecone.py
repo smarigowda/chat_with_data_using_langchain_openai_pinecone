@@ -60,11 +60,22 @@ def main():
     print(f"Split into {len(docs)} chunks of text. Max chunk size is {chunk_size}")
 
     # initialize pinecone
-    pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
+    pinecone.init(
+        api_key=pinecone_api_key,
+        environment=pinecone_environment,
+    )
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
     # create embeddings and store them in pinecone index
-    Pinecone.from_documents(docs, embeddings, index_name=index_name)
+    index = pinecone.Index(index_name)
+    vectorstore = Pinecone(index, embeddings.embed_query, "text", namespace="text")
+    vectorstore.from_documents(
+        documents=docs,
+        embedding=embeddings,
+        index_name=index_name,
+        text_key="text",
+        namespace="text",
+    )
     pass
 
 
